@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imposter Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- HOME SCREEN -->
+        <section id="homeScreen" class="screen active">
+            <div class="screen-content">
+                <h1 class="game-title">Imposter Game</h1>
+                <p class="subtitle">Find the imposter among your friends</p>
+                <button class="btn btn-primary btn-large" onclick="goToPlayerSetup()">Start Game</button>
+            </div>
+        </section>
+
+        <!-- PLAYER SETUP SCREEN -->
+        <section id="playerSetupScreen" class="screen">
+            <div class="screen-content">
+                <h2>Add Players</h2>
+                <div class="player-input-group">
+                    <input 
+                        type="text" 
+                        id="playerNameInput" 
+                        class="input-field" 
+                        placeholder="Enter player name"
+                        autocomplete="off"
+                    >
+                    <button class="btn btn-secondary" onclick="addPlayerFromInput()">Add Player</button>
+                </div>
+
+                <div class="players-list-container">
+                    <h3>Players (<span id="playerCount">0</span>)</h3>
+                    <ul id="playersList" class="players-list"></ul>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="goToHome()">Back</button>
+                    <button id="startGameBtn" class="btn btn-primary" onclick="startGame()" disabled>
+                        Start Game (Min 3)
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- PASS PHONE SCREEN -->
+        <section id="passPhoneScreen" class="screen">
+            <div class="screen-content">
+                <h2 id="passPhonePlayerName" class="player-name-display"></h2>
+                <p class="instruction-text">Pass the phone to the next player</p>
+                <button class="btn btn-primary btn-large" onclick="goToRoleReveal()">Reveal Role</button>
+            </div>
+        </section>
+
+        <!-- ROLE REVEAL SCREEN -->
+        <section id="roleRevealScreen" class="screen">
+            <div class="screen-content">
+                <h2 id="rolePlayerName" class="player-name-display"></h2>
+                <div id="roleDisplay" class="role-display">
+                    <p id="roleText" class="role-text"></p>
+                </div>
+                <button class="btn btn-primary btn-large" onclick="hideAndPass()">Hide & Pass</button>
+            </div>
+        </section>
+
+        <!-- DISCUSSION SCREEN -->
+        <section id="discussionScreen" class="screen">
+            <div class="screen-content">
+                <h2>Discussion Time</h2>
+                <p class="instruction-text">Discuss and find the imposter!</p>
+                
+                <div class="players-list-container">
+                    <h3>Players in Game</h3>
+                    <ul id="discussionPlayersList" class="players-list players-list-discussion"></ul>
+                </div>
+
+                <div class="timer-container">
+                    <div id="countdown" class="countdown">00:30</div>
+                </div>
+
+                <button class="btn btn-primary btn-large" onclick="goToResult()">Ready to Reveal</button>
+            </div>
+        </section>
+
+        <!-- RESULT SCREEN -->
+        <section id="resultScreen" class="screen">
+            <div class="screen-content">
+                <h2>Round Over!</h2>
+                <div class="result-display">
+                    <p class="result-label">The Imposter was:</p>
+                    <p id="imposterReveal" class="imposter-name"></p>
+                </div>
+                <button class="btn btn-primary btn-large" onclick="playAgain()">Play Again</button>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

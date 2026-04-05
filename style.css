@@ -1,0 +1,507 @@
+/* ============================================
+   IMPOSTER GAME - STYLESHEET
+   Dark theme, animations, responsive design
+   ============================================ */
+
+/* CSS VARIABLES */
+:root {
+    --primary-color: #6366f1;
+    --secondary-color: #8b5cf6;
+    --accent-color: #ec4899;
+    --background: #0f172a;
+    --surface: #1e293b;
+    --surface-light: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --border-color: #475569;
+    --success-color: #10b981;
+    --error-color: #ef4444;
+    --radius: 12px;
+    --transition: all 0.3s ease;
+}
+
+/* ============================================
+   GLOBAL STYLES
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background: var(--background);
+    color: var(--text-primary);
+}
+
+body {
+    overflow: hidden;
+}
+
+/* ============================================
+   CONTAINER & LAYOUT
+   ============================================ */
+
+.container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* ============================================
+   SCREENS
+   ============================================ */
+
+.screen {
+    display: none;
+    width: 100%;
+    max-width: 600px;
+    animation: fadeIn 0.5s ease;
+}
+
+.screen.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.screen-content {
+    width: 100%;
+    text-align: center;
+    padding: 40px 30px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+
+h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--text-secondary);
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+}
+
+.instruction-text {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+}
+
+.player-name-display {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 30px;
+    animation: scaleIn 0.4s ease;
+}
+
+.role-text {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    animation: fadeIn 0.6s ease 0.2s both;
+}
+
+.game-title {
+    text-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.btn {
+    padding: 14px 28px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+}
+
+.btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: var(--surface-light);
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--border-color);
+    border-color: var(--primary-color);
+}
+
+.btn-large {
+    padding: 18px 40px;
+    font-size: 1.1rem;
+    width: 100%;
+    max-width: 300px;
+    margin-top: 20px;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+
+.player-input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.input-field {
+    flex: 1;
+    min-width: 200px;
+    padding: 14px 18px;
+    font-size: 1rem;
+    background: var(--background);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    transition: var(--transition);
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.input-field::placeholder {
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   PLAYERS LIST
+   ============================================ */
+
+.players-list-container {
+    margin: 30px 0;
+    text-align: left;
+}
+
+.players-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.player-item {
+    padding: 14px 18px;
+    background: var(--background);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: slideIn 0.3s ease;
+}
+
+.player-item span {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.remove-btn {
+    background: var(--error-color);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.remove-btn:hover {
+    background: #dc2626;
+    transform: scale(1.05);
+}
+
+.players-list-discussion {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+}
+
+.players-list-discussion .player-item {
+    flex-direction: column;
+    padding: 20px;
+    min-width: 120px;
+    background: linear-gradient(135deg, var(--surface-light), var(--surface));
+    border: 1px solid var(--primary-color);
+    animation: slideIn 0.3s ease;
+}
+
+.players-list-discussion .player-item .remove-btn {
+    display: none;
+}
+
+.players-list-discussion .player-item span {
+    width: 100%;
+    text-align: center;
+}
+
+.player-count {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   ROLE DISPLAY
+   ============================================ */
+
+.role-display {
+    background: linear-gradient(135deg, var(--surface-light), var(--background));
+    padding: 60px 30px;
+    border-radius: var(--radius);
+    border: 2px solid var(--primary-color);
+    margin-bottom: 30px;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ============================================
+   RESULT DISPLAY
+   ============================================ */
+
+.result-display {
+    background: linear-gradient(135deg, var(--surface-light), var(--background));
+    padding: 50px 30px;
+    border-radius: var(--radius);
+    border: 2px solid var(--accent-color);
+    margin-bottom: 30px;
+    animation: slideUp 0.5s ease;
+}
+
+.result-label {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+.imposter-name {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    animation: scaleIn 0.5s ease 0.3s both;
+}
+
+/* ============================================
+   COUNTDOWN TIMER
+   ============================================ */
+
+.timer-container {
+    margin: 30px 0;
+}
+
+.countdown {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ============================================
+   BUTTON GROUP
+   ============================================ */
+
+.button-group {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.button-group .btn {
+    flex: 1;
+    min-width: 120px;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 600px) {
+    .screen-content {
+        padding: 30px 20px;
+        border-radius: 8px;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    .player-name-display {
+        font-size: 2rem;
+    }
+
+    .role-text {
+        font-size: 1.5rem;
+    }
+
+    .imposter-name {
+        font-size: 2rem;
+    }
+
+    .btn-large {
+        max-width: 100%;
+        padding: 16px 24px;
+    }
+
+    .player-input-group {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .input-field {
+        min-width: 100%;
+    }
+
+    .button-group {
+        flex-direction: column;
+    }
+
+    .button-group .btn {
+        width: 100%;
+    }
+
+    .players-list-discussion .player-item {
+        min-width: 100px;
+        padding: 15px 10px;
+        font-size: 0.9rem;
+    }
+
+    .countdown {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 400px) {
+    h1 {
+        font-size: 2rem;
+    }
+
+    .subtitle, .instruction-text {
+        font-size: 1rem;
+    }
+
+    .btn {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+    }
+}
