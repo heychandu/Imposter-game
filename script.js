@@ -1,6 +1,7 @@
 // ============================================
 // IMPOSTER GAME - JAVASCRIPT
 // Game logic, state management, and event handlers
+// Among Us themed party game
 // ============================================
 
 // ============================================
@@ -31,13 +32,24 @@ const WORD_LIST = [
     'Pyramid'
 ];
 
+const CLUE_TIME = 15; // 15 seconds to say a clue
+const DISCUSSION_TIME = 30; // 30 seconds for discussion
+const MAX_ROUNDS = 10; // Maximum rounds before game ends
+
 // Main game state object
 const gameState = {
     players: [],
+    scores: {}, // Track scores for each player
     currentImposter: null,
     selectedWord: null,
     currentPlayerIndex: 0,
     gameActive: false,
+    roundNumber: 0,
+    maximumRounds: MAX_ROUNDS,
+    playerVotes: {}, // Track votes: { playerName: votedForName }
+    impostersGuessed: [], // Track if imposter was caught
+    imposterCaught: false,
+    allPlayersVoted: false,
 };
 
 // ============================================
@@ -76,6 +88,9 @@ function goToHome() {
 function goToPlayerSetup() {
     showScreen('playerSetup');
     gameState.players = [];
+    Object.keys(gameState.scores).forEach(player => {
+        delete gameState.scores[player];
+    });
     updatePlayersList();
 }
 
@@ -96,6 +111,15 @@ function goToRoleReveal() {
 }
 
 /**
+ * Navigate to clue giving screen
+ */
+function goToClueGiving() {
+    updateClueGivingDisplay();
+    startClueTimer();
+    showScreen('clueGiving');
+}
+
+/**
  * Navigate to discussion screen
  */
 function goToDiscussion() {
@@ -105,11 +129,29 @@ function goToDiscussion() {
 }
 
 /**
- * Navigate to result screen
+ * Navigate to voting screen for first player
  */
-function goToResult() {
-    updateResultDisplay();
-    showScreen('result');
+function goToVoting() {
+    gameState.playerVotes = {};
+    gameState.allPlayersVoted = false;
+    gameState.currentPlayerIndex = 0;
+    startVotingPhase();
+}
+
+/**
+ * Navigate to vote results screen
+ */
+function goToVoteResults() {
+    updateVoteResultsDisplay();
+    showScreen('voteResults');
+}
+
+/**
+ * Navigate to leaderboard screen
+ */
+function goToLeaderboard() {
+    updateLeaderboardDisplay();
+    showScreen('leaderboard');
 }
 
 // ============================================
@@ -144,6 +186,9 @@ function addPlayerFromInput() {
  */
 function addPlayer(playerName) {
     gameState.players.push(playerName);
+    if (!gameState.scores[playerName]) {
+        gameState.scores[playerName] = 0;
+    }
     updatePlayersList();
     updateStartGameButton();
 }
@@ -153,7 +198,9 @@ function addPlayer(playerName) {
  * @param {number} index - The index of the player to remove
  */
 function removePlayer(index) {
+    const playerName = gameState.players[index];
     gameState.players.splice(index, 1);
+    delete gameState.scores[playerName];
     updatePlayersList();
     updateStartGameButton();
 }
@@ -215,24 +262,34 @@ function startGame() {
         return;
     }
 
-    initializeGame();
     gameState.gameActive = true;
+    gameState.roundNumber = 1;
+    startNewRound();
+}
+
+/**
+ * Start a new round
+ */
+function startNewRound() {
+    initializeRound();
     gameState.currentPlayerIndex = 0;
     goToPassPhone();
 }
 
 /**
- * Initialize game state - select imposter and word
+ * Initialize round - select imposter and word
  */
-function initializeGame() {
+function initializeRound() {
     // Select random imposter
     gameState.currentImposter = Math.floor(Math.random() * gameState.players.length);
 
     // Select random word
     gameState.selectedWord = WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)];
 
-    // Reset player index
-    gameState.currentPlayerIndex = 0;
+    // Reset state
+    gameState.playerVotes = {};
+    gameState.allPlayersVoted = false;
+    gameState.imposterCaught = false;
 }
 
 /**
@@ -242,7 +299,7 @@ function initializeGame() {
  */
 function getPlayerRole(playerIndex) {
     if (playerIndex === gameState.currentImposter) {
-        return 'You are the Imposter';
+        return 'You are an Imposter';
     } else {
         return gameState.selectedWord;
     }
@@ -280,11 +337,14 @@ function updateRoleRevealDisplay() {
 }
 
 /**
- * Update result screen display
+ * Update clue giving screen display
  */
-function updateResultDisplay() {
-    const imposterReveal = document.getElementById('imposterReveal');
-    imposterReveal.textContent = gameState.players[gameState.currentImposter];
+function updateClueGivingDisplay() {
+    const playerNameDisplay = document.getElementById('cluePlayerName');
+    const roundInfo = document.getElementById('clueRoundInfo');
+
+    playerNameDisplay.textContent = getCurrentPlayerName();
+    roundInfo.textContent = `Player ${gameState.currentPlayerIndex + 1} of ${gameState.players.length} • Round ${gameState.roundNumber}`;
 }
 
 // ============================================
@@ -297,20 +357,252 @@ function updateResultDisplay() {
 function hideAndPass() {
     gameState.currentPlayerIndex++;
 
-    // All players have revealed their roles, move to discussion
+    // All players have revealed their roles, move to clue giving
     if (gameState.currentPlayerIndex >= gameState.players.length) {
-        goToDiscussion();
+        gameState.currentPlayerIndex = 0;
+        goToClueGiving();
     } else {
         // Move to next player
         goToPassPhone();
     }
 }
 
+// ============================================
+// CLUE GIVING PHASE
+// ============================================
+
+let clueTimerInterval = null;
+
 /**
- * Advance to result screen
+ * Start countdown timer for clue giving phase
  */
-function proceedToResult() {
-    goToResult();
+function startClueTimer() {
+    let timeLeft = CLUE_TIME;
+    const timerDisplay = document.getElementById('clueTimer');
+
+    // Clear any existing timeout
+    if (clueTimerInterval) {
+        clearInterval(clueTimerInterval);
+    }
+
+    // Update display immediately
+    updateTimerDisplay(timeLeft, timerDisplay);
+
+    clueTimerInterval = setInterval(() => {
+        timeLeft--;
+
+        updateTimerDisplay(timeLeft, timerDisplay);
+
+        if (timeLeft <= 0) {
+            clearInterval(clueTimerInterval);
+        }
+    }, 1000);
+}
+
+/**
+ * Move to next player in clue giving phase
+ */
+function nextPlayerClue() {
+    if (clueTimerInterval) {
+        clearInterval(clueTimerInterval);
+    }
+
+    gameState.currentPlayerIndex++;
+
+    if (gameState.currentPlayerIndex >= gameState.players.length) {
+        // All players have given clues, move to discussion
+        gameState.currentPlayerIndex = 0;
+        goToDiscussion();
+    } else {
+        // Move to next player's clue
+        goToClueGiving();
+    }
+}
+
+// ============================================
+// VOTING PHASE
+// ============================================
+
+/**
+ * Start voting phase - show first player voting screen
+ */
+function startVotingPhase() {
+    gameState.currentPlayerIndex = 0;
+    updateVotingDisplay();
+    showScreen('voting');
+}
+
+/**
+ * Update voting screen display
+ */
+function updateVotingDisplay() {
+    const votingPlayerName = document.getElementById('votingPlayerName');
+    const votingPlayersList = document.getElementById('votingPlayersList');
+    const votingStatus = document.getElementById('votingStatus');
+
+    votingPlayerName.textContent = getCurrentPlayerName();
+
+    votingPlayersList.innerHTML = '';
+    gameState.players.forEach((player) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<button class="voting-button" onclick="castVote('${player}')">${player}</button>`;
+        votingPlayersList.appendChild(li);
+    });
+
+    const votedCount = Object.keys(gameState.playerVotes).length;
+    votingStatus.textContent = `${votedCount} of ${gameState.players.length} players voted`;
+}
+
+/**
+ * Cast a vote for a player
+ * @param {string} votedFor - The player being voted for
+ */
+function castVote(votedFor) {
+    const currentPlayer = getCurrentPlayerName();
+    gameState.playerVotes[currentPlayer] = votedFor;
+
+    // Move to next player voting or show results
+    gameState.currentPlayerIndex++;
+
+    if (gameState.currentPlayerIndex < gameState.players.length) {
+        // More players to vote
+        updateVotingDisplay();
+    } else {
+        // All voted, show results
+        goToVoteResults();
+    }
+}
+
+// ============================================
+// VOTE RESULTS & ROUND END
+// ============================================
+
+/**
+ * Update vote results display
+ */
+function updateVoteResultsDisplay() {
+    const voteResultsList = document.getElementById('voteResultsList');
+    const roundResultLabel = document.getElementById('roundResultLabel');
+    const roundResultText = document.getElementById('roundResultText');
+    const pointsDisplay = document.getElementById('pointsDisplay');
+
+    // Count votes
+    const voteCount = {};
+    gameState.players.forEach(player => {
+        voteCount[player] = 0;
+    });
+
+    Object.values(gameState.playerVotes).forEach(votedFor => {
+        if (voteCount.hasOwnProperty(votedFor)) {
+            voteCount[votedFor]++;
+        }
+    });
+
+    // Display vote results
+    voteResultsList.innerHTML = '';
+    Object.entries(voteCount).forEach(([player, votes]) => {
+        const li = document.createElement('li');
+        const imposterCaught = player === gameState.players[gameState.currentImposter] && votes > 0;
+        li.className = `vote-result-item ${imposterCaught ? 'imposter-caught' : ''}`;
+        li.innerHTML = `
+            <span class="vote-result-name">${player}</span>
+            <span class="vote-result-votes">${votes} vote${votes !== 1 ? 's' : ''}</span>
+        `;
+        voteResultsList.appendChild(li);
+    });
+
+    // Determine winner of round and award points
+    const maxVotes = Math.max(...Object.values(voteCount), 0);
+    const mostVoted = Object.keys(voteCount).find(player => voteCount[player] === maxVotes);
+    const imposterName = gameState.players[gameState.currentImposter];
+
+    // Check if imposter was caught
+    gameState.imposterCaught = mostVoted === imposterName && maxVotes > 0;
+
+    // Award points
+    let pointsAwarded = {};
+    gameState.players.forEach(player => {
+        pointsAwarded[player] = 0;
+    });
+
+    if (gameState.imposterCaught) {
+        // Imposter caught - award points to those who voted for imposter
+        pointsAwarded[imposterName] = 0; // Imposter gets 0
+        Object.entries(gameState.playerVotes).forEach(([voter, votedFor]) => {
+            if (votedFor === imposterName) {
+                pointsAwarded[voter] = 10; // Caught imposter gets 10 points
+            }
+        });
+        roundResultLabel.textContent = 'Imposter Caught!';
+        roundResultText.textContent = `${imposterName} was the Imposter`;
+    } else {
+        // Imposter not caught - imposter gets max points
+        pointsAwarded[imposterName] = 20;
+        roundResultLabel.textContent = 'Imposter Escaped!';
+        roundResultText.textContent = `${imposterName} fooled everyone`;
+    }
+
+    // Update game scores
+    Object.entries(pointsAwarded).forEach(([player, points]) => {
+        gameState.scores[player] += points;
+    });
+
+    // Display points this round
+    pointsDisplay.innerHTML = '<h3>Points This Round:</h3>';
+    Object.entries(pointsAwarded).forEach(([player, points]) => {
+        const pointClass = points > 0 ? 'gained' : 'zero';
+        pointsDisplay.innerHTML += `
+            <div class="point-item ${pointClass}">
+                <span>${player}</span>
+                <span>+${points}</span>
+            </div>
+        `;
+    });
+
+    // Determine if game continues or ends
+    const nextRoundBtn = document.getElementById('nextRoundBtn');
+    if (gameState.imposterCaught || gameState.roundNumber >= gameState.maximumRounds) {
+        nextRoundBtn.textContent = 'View Leaderboard';
+        nextRoundBtn.onclick = goToLeaderboard;
+    } else {
+        nextRoundBtn.textContent = 'Next Round';
+        nextRoundBtn.onclick = nextRound;
+    }
+}
+
+/**
+ * Move to next round
+ */
+function nextRound() {
+    gameState.roundNumber++;
+    startNewRound();
+}
+
+// ============================================
+// LEADERBOARD
+// ============================================
+
+/**
+ * Update and display leaderboard
+ */
+function updateLeaderboardDisplay() {
+    const leaderboardList = document.getElementById('leaderboardList');
+    leaderboardList.innerHTML = '';
+
+    // Sort players by score (descending)
+    const sortedPlayers = gameState.players.sort((a, b) => gameState.scores[b] - gameState.scores[a]);
+
+    sortedPlayers.forEach((player, index) => {
+        const li = document.createElement('li');
+        const isFirst = index === 0;
+        li.className = `leaderboard-item ${isFirst ? 'first' : ''}`;
+        li.innerHTML = `
+            <span class="leaderboard-rank">#${index + 1}</span>
+            <span class="leaderboard-name">${player}</span>
+            <span class="leaderboard-score">${gameState.scores[player]}</span>
+        `;
+        leaderboardList.appendChild(li);
+    });
 }
 
 // ============================================
@@ -318,7 +610,6 @@ function proceedToResult() {
 // ============================================
 
 let countdownInterval = null;
-const DISCUSSION_TIME = 30; // 30 seconds for discussion
 
 /**
  * Start countdown timer for discussion phase
@@ -333,12 +624,12 @@ function startCountdown() {
     }
 
     // Update display immediately
-    updateCountdownDisplay(timeLeft, countdownDisplay);
+    updateTimerDisplay(timeLeft, countdownDisplay);
 
     countdownInterval = setInterval(() => {
         timeLeft--;
 
-        updateCountdownDisplay(timeLeft, countdownDisplay);
+        updateTimerDisplay(timeLeft, countdownDisplay);
 
         if (timeLeft <= 0) {
             clearInterval(countdownInterval);
@@ -347,11 +638,11 @@ function startCountdown() {
 }
 
 /**
- * Format and update countdown display
+ * Format and update timer display
  * @param {number} seconds - Seconds remaining
  * @param {HTMLElement} element - The element to update
  */
-function updateCountdownDisplay(seconds, element) {
+function updateTimerDisplay(seconds, element) {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     element.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
@@ -374,13 +665,23 @@ function playAgain() {
  */
 function resetGame() {
     gameState.players = [];
+    gameState.scores = {};
     gameState.currentImposter = null;
     gameState.selectedWord = null;
     gameState.currentPlayerIndex = 0;
     gameState.gameActive = false;
+    gameState.roundNumber = 0;
+    gameState.playerVotes = {};
+    gameState.impostersGuessed = [];
+    gameState.imposterCaught = false;
+    gameState.allPlayersVoted = false;
 
     if (countdownInterval) {
         clearInterval(countdownInterval);
+    }
+
+    if (clueTimerInterval) {
+        clearInterval(clueTimerInterval);
     }
 
     updatePlayersList();
@@ -409,3 +710,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show home screen by default
     showScreen('home');
 });
+

@@ -66,6 +66,20 @@
             </div>
         </section>
 
+        <!-- CLUE GIVING SCREEN -->
+        <section id="clueGivingScreen" class="screen">
+            <div class="screen-content">
+                <h2 id="cluePlayerName" class="player-name-display"></h2>
+                <p class="instruction-text">Say a clue or hint about the word!</p>
+                <div class="timer-container">
+                    <div id="clueTimer" class="countdown imposter-red">00:15</div>
+                </div>
+                <p id="clueRoundInfo" class="round-info"></p>
+                <button class="btn btn-primary btn-large" onclick="nextPlayerClue()">Next Player</button>
+                <p class="hint-text">Take this time to say your clue!</p>
+            </div>
+        </section>
+
         <!-- DISCUSSION SCREEN -->
         <section id="discussionScreen" class="screen">
             <div class="screen-content">
@@ -81,17 +95,44 @@
                     <div id="countdown" class="countdown">00:30</div>
                 </div>
 
-                <button class="btn btn-primary btn-large" onclick="goToResult()">Ready to Reveal</button>
+                <button class="btn btn-primary btn-large" onclick="goToVoting()">Ready to Vote</button>
             </div>
         </section>
 
-        <!-- RESULT SCREEN -->
-        <section id="resultScreen" class="screen">
+        <!-- VOTING SCREEN -->
+        <section id="votingScreen" class="screen">
             <div class="screen-content">
-                <h2>Round Over!</h2>
+                <h2 id="votingPlayerName" class="player-name-display"></h2>
+                <p class="instruction-text">Who is the Imposter?</p>
+                <div class="voting-buttons-container">
+                    <ul id="votingPlayersList" class="voting-buttons-list"></ul>
+                </div>
+                <p id="votingStatus" class="voting-status"></p>
+            </div>
+        </section>
+
+        <!-- VOTE RESULTS SCREEN -->
+        <section id="voteResultsScreen" class="screen">
+            <div class="screen-content">
+                <h2>Vote Results</h2>
+                <div class="vote-results-container">
+                    <ul id="voteResultsList" class="vote-results-list"></ul>
+                </div>
                 <div class="result-display">
-                    <p class="result-label">The Imposter was:</p>
-                    <p id="imposterReveal" class="imposter-name"></p>
+                    <p class="result-label" id="roundResultLabel"></p>
+                    <p id="roundResultText" class="result-text"></p>
+                </div>
+                <div id="pointsDisplay" class="points-display"></div>
+                <button class="btn btn-primary btn-large" id="nextRoundBtn" onclick="nextRound()">Next Round</button>
+            </div>
+        </section>
+
+        <!-- LEADERBOARD SCREEN -->
+        <section id="leaderboardScreen" class="screen">
+            <div class="screen-content">
+                <h2>Final Leaderboard</h2>
+                <div class="leaderboard-container">
+                    <ul id="leaderboardList" class="leaderboard-list"></ul>
                 </div>
                 <button class="btn btn-primary btn-large" onclick="playAgain()">Play Again</button>
             </div>

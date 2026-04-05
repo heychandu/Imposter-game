@@ -3,21 +3,22 @@
    Dark theme, animations, responsive design
    ============================================ */
 
-/* CSS VARIABLES */
+/* CSS VARIABLES - Among Us Theme */
 :root {
-    --primary-color: #6366f1;
-    --secondary-color: #8b5cf6;
-    --accent-color: #ec4899;
-    --background: #0f172a;
-    --surface: #1e293b;
-    --surface-light: #334155;
-    --text-primary: #f1f5f9;
-    --text-secondary: #cbd5e1;
-    --border-color: #475569;
+    --primary-color: #c1121f;
+    --secondary-color: #ff0000;
+    --accent-color: #ff3d3d;
+    --background: #0b1117;
+    --surface: #161b22;
+    --surface-light: #21262d;
+    --text-primary: #ffffff;
+    --text-secondary: #c9d1d9;
+    --border-color: #30363d;
     --success-color: #10b981;
-    --error-color: #ef4444;
+    --error-color: #ff0000;
     --radius: 12px;
     --transition: all 0.3s ease;
+    --imposter-red: #c1121f;
 }
 
 /* ============================================
@@ -94,6 +95,7 @@ h1 {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    text-shadow: 0 0 20px rgba(193, 18, 31, 0.3);
 }
 
 h2 {
@@ -380,6 +382,216 @@ h3 {
 .button-group .btn {
     flex: 1;
     min-width: 120px;
+}
+
+/* ============================================
+   VOTING SYSTEM
+   ============================================ */
+
+.voting-buttons-container {
+    margin: 30px 0;
+}
+
+.voting-buttons-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.voting-button {
+    padding: 16px;
+    background: var(--surface-light);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.95rem;
+}
+
+.voting-button:hover {
+    border-color: var(--primary-color);
+    background: var(--surface);
+    transform: scale(1.05);
+}
+
+.voting-button.voted {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 15px rgba(193, 18, 31, 0.5);
+}
+
+.voting-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.voting-status {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-top: 20px;
+    font-weight: 500;
+}
+
+/* ============================================
+   VOTE RESULTS
+   ============================================ */
+
+.vote-results-container {
+    margin: 30px 0;
+    text-align: left;
+}
+
+.vote-results-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.vote-result-item {
+    padding: 16px;
+    background: var(--surface-light);
+    border-radius: var(--radius);
+    border-left: 4px solid var(--primary-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vote-result-item.imposter-caught {
+    border-left-color: var(--error-color);
+    background: rgba(193, 18, 31, 0.1);
+}
+
+.vote-result-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.vote-result-votes {
+    background: var(--primary-color);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-weight: 700;
+}
+
+/* ============================================
+   LEADERBOARD
+   ============================================ */
+
+.leaderboard-container {
+    margin: 30px 0;
+    text-align: left;
+}
+
+.leaderboard-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.leaderboard-item {
+    padding: 20px;
+    background: linear-gradient(135deg, var(--surface-light), var(--surface));
+    border-radius: var(--radius);
+    border: 2px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: slideIn 0.3s ease;
+}
+
+.leaderboard-item.first {
+    border-color: var(--primary-color);
+    background: linear-gradient(135deg, rgba(193, 18, 31, 0.2), rgba(193, 18, 31, 0.1));
+    transform: scale(1.02);
+}
+
+.leaderboard-rank {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    min-width: 50px;
+}
+
+.leaderboard-name {
+    flex: 1;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 20px;
+}
+
+.leaderboard-score {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    background: var(--surface);
+    padding: 8px 16px;
+    border-radius: 6px;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.hint-text {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-top: 20px;
+    font-style: italic;
+}
+
+.round-info {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.result-text {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-top: 15px;
+    animation: scaleIn 0.5s ease 0.3s both;
+}
+
+.points-display {
+    background: var(--surface-light);
+    padding: 20px;
+    border-radius: var(--radius);
+    margin: 20px 0;
+    border-left: 4px solid var(--primary-color);
+    animation: slideUp 0.5s ease;
+}
+
+.point-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.point-item.gained {
+    color: var(--success-color);
+    font-weight: 700;
+}
+
+.point-item.zero {
+    color: var(--error-color);
+}
+
+.imposter-red {
+    color: var(--imposter-red);
 }
 
 /* ============================================
